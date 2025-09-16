@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ManufacturingInputs } from '@/types';
+import GrowthRateSettingsComponent from './GrowthRateSettings';
 
 interface ManufacturingInputFormProps {
   initialData?: Partial<ManufacturingInputs>;
@@ -21,6 +22,11 @@ export default function ManufacturingInputForm({ initialData, onChange, currency
     laborCostPerUnit: 10,
     shippingCostPerUnit: 5,
     otherVariableCostPerUnit: 3,
+    growthRateSettings: {
+      quarterlyRates: [],
+      applyToRevenue: true,
+      applyToCustomers: true,
+    },
     ...initialData,
   });
 
@@ -244,6 +250,13 @@ export default function ManufacturingInputForm({ initialData, onChange, currency
           </div>
         </CardContent>
       </Card>
+
+      {/* 성장률 설정 */}
+      <GrowthRateSettingsComponent
+        settings={data.growthRateSettings}
+        onSettingsChange={(settings) => updateData({ growthRateSettings: settings })}
+        businessType="manufacturing"
+      />
     </div>
   );
 }

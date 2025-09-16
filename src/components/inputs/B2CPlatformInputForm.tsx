@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { B2CPlatformInputs } from '@/types';
+import GrowthRateSettingsComponent from './GrowthRateSettings';
 
 interface B2CPlatformInputFormProps {
   initialData?: Partial<B2CPlatformInputs>;
@@ -29,6 +30,12 @@ export default function B2CPlatformInputForm({ initialData, onChange, currency }
       activeSuppliers: 200,
       averageListingsPerSupplier: 10,
       averageRevenuePerSupplier: 500,
+    },
+    growthRateSettings: {
+      quarterlyRates: [],
+      applyToRevenue: true,
+      applyToCustomers: true,
+      applyToOrders: true,
     },
     ...initialData,
   });
@@ -401,6 +408,13 @@ export default function B2CPlatformInputForm({ initialData, onChange, currency }
           </div>
         </CardContent>
       </Card>
+
+      {/* 성장률 설정 */}
+      <GrowthRateSettingsComponent
+        settings={data.growthRateSettings}
+        onSettingsChange={(settings) => updateData({ growthRateSettings: settings })}
+        businessType="b2c-platform"
+      />
     </div>
   );
 }

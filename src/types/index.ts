@@ -22,6 +22,40 @@ export interface ChannelInfo {
   costPerVisitor?: number;
 }
 
+// 퍼널 단계 정의
+export interface FunnelStep {
+  id: string;
+  name: string;
+  description?: string;
+  conversionRate: number; // 0-1
+  order: number; // 1-5
+}
+
+// 맞춤형 퍼널 설정
+export interface CustomFunnel {
+  id: string;
+  name: string;
+  description?: string;
+  steps: FunnelStep[];
+  isActive: boolean;
+}
+
+// 분기별 성장률 설정
+export interface QuarterlyGrowthRate {
+  quarter: number; // 1-4
+  year: number;
+  growthRate: number; // -1 to 1 (예: 0.1 = 10% 성장)
+  description?: string;
+}
+
+// 성장률 설정
+export interface GrowthRateSettings {
+  quarterlyRates: QuarterlyGrowthRate[];
+  applyToRevenue: boolean;
+  applyToCustomers: boolean;
+  applyToOrders?: boolean; // B2C 플랫폼에서만
+}
+
 // SaaS 모드 입력 데이터
 export interface SaasInputs {
   monthlyVisitors: number;
@@ -32,6 +66,11 @@ export interface SaasInputs {
   monthlyPrice: number;
   annualPrice: number;
   annualDiscountRate: number; // 0-1
+  // 맞춤형 퍼널 설정
+  customFunnels: CustomFunnel[];
+  activeFunnelId?: string;
+  // 성장률 설정
+  growthRateSettings: GrowthRateSettings;
 }
 
 // 제조/유통 모드 입력 데이터
@@ -43,6 +82,8 @@ export interface ManufacturingInputs {
   laborCostPerUnit: number;
   shippingCostPerUnit: number;
   otherVariableCostPerUnit: number;
+  // 성장률 설정
+  growthRateSettings: GrowthRateSettings;
 }
 
 // 공급자(판매자) 정보
@@ -66,6 +107,8 @@ export interface B2CPlatformInputs {
   adRevenuePerMonth: number;
   // 공급자 여정
   suppliers: SupplierInfo;
+  // 성장률 설정
+  growthRateSettings: GrowthRateSettings;
 }
 
 // 비용 데이터

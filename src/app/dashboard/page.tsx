@@ -34,6 +34,13 @@ export default function Dashboard() {
     monthlyPrice: 25,
     annualPrice: 250,
     annualDiscountRate: 0.17,
+    customFunnels: [],
+    activeFunnelId: undefined,
+    growthRateSettings: {
+      quarterlyRates: [],
+      applyToRevenue: true,
+      applyToCustomers: true,
+    },
   });
   
   const [manufacturingInputs, setManufacturingInputs] = useState<ManufacturingInputs>({
@@ -44,6 +51,11 @@ export default function Dashboard() {
     laborCostPerUnit: 10,
     shippingCostPerUnit: 5,
     otherVariableCostPerUnit: 3,
+    growthRateSettings: {
+      quarterlyRates: [],
+      applyToRevenue: true,
+      applyToCustomers: true,
+    },
   });
   
   const [b2cPlatformInputs, setB2CPlatformInputs] = useState<B2CPlatformInputs>({
@@ -61,6 +73,12 @@ export default function Dashboard() {
       activeSuppliers: 200,
       averageListingsPerSupplier: 10,
       averageRevenuePerSupplier: 500,
+    },
+    growthRateSettings: {
+      quarterlyRates: [],
+      applyToRevenue: true,
+      applyToCustomers: true,
+      applyToOrders: true,
     },
   });
   

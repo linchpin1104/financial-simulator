@@ -8,6 +8,8 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 import { SaasInputs, ChannelInfo } from '@/types';
+import CustomFunnelSettings from './CustomFunnelSettings';
+import GrowthRateSettingsComponent from './GrowthRateSettings';
 
 interface SaasInputFormProps {
   initialData?: Partial<SaasInputs>;
@@ -29,6 +31,13 @@ export default function SaasInputForm({ initialData, onChange, currency }: SaasI
     monthlyPrice: 25,
     annualPrice: 250,
     annualDiscountRate: 0.17,
+    customFunnels: [],
+    activeFunnelId: undefined,
+    growthRateSettings: {
+      quarterlyRates: [],
+      applyToRevenue: true,
+      applyToCustomers: true,
+    },
     ...initialData,
   });
 
@@ -392,6 +401,21 @@ export default function SaasInputForm({ initialData, onChange, currency }: SaasI
           </div>
         </CardContent>
       </Card>
+
+      {/* 맞춤형 퍼널 설정 */}
+      <CustomFunnelSettings
+        funnels={data.customFunnels}
+        onFunnelsChange={(funnels) => updateData({ customFunnels: funnels })}
+        activeFunnelId={data.activeFunnelId}
+        onActiveFunnelChange={(funnelId) => updateData({ activeFunnelId: funnelId })}
+      />
+
+      {/* 성장률 설정 */}
+      <GrowthRateSettingsComponent
+        settings={data.growthRateSettings}
+        onSettingsChange={(settings) => updateData({ growthRateSettings: settings })}
+        businessType="saas"
+      />
     </div>
   );
 }
