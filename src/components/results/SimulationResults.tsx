@@ -8,6 +8,11 @@ import RevenueChart from './RevenueChart';
 import CostChart from './CostChart';
 import CustomerChart from './CustomerChart';
 import KPICards from './KPICards';
+import BreakEvenAnalysisCard from './BreakEvenAnalysisCard';
+import CostStructureCard from './CostStructureCard';
+import ScaleEconomicsCard from './ScaleEconomicsCard';
+import HRCostAnalysisCard from './HRCostAnalysisCard';
+import IndustryBenchmarkCard from './IndustryBenchmarkCard';
 
 interface SimulationResultsProps {
   businessType: BusinessType;
@@ -83,6 +88,40 @@ export default function SimulationResults({
       <CustomerChart 
         result={simulationResult} 
         businessType={businessType} 
+      />
+
+      {/* 손익분기점 분석 */}
+      <BreakEvenAnalysisCard 
+        result={simulationResult}
+        currency={currency}
+      />
+
+      {/* 비용 구조 분석 */}
+      <CostStructureCard 
+        result={simulationResult}
+        costInputs={costInputs}
+        currency={currency}
+      />
+
+      {/* 규모의 경제 분석 */}
+      <ScaleEconomicsCard 
+        result={simulationResult}
+        businessType={businessType}
+        currency={currency}
+      />
+
+      {/* 인건비 분석 */}
+      <HRCostAnalysisCard 
+        result={simulationResult}
+        businessType={businessType}
+        currency={currency}
+      />
+
+      {/* 산업 벤치마크 비교 */}
+      <IndustryBenchmarkCard 
+        result={simulationResult}
+        businessType={businessType}
+        currency={currency}
       />
     </div>
   );
