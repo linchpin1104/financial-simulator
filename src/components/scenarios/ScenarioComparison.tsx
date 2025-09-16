@@ -7,6 +7,7 @@ import { BusinessType, SaasInputs, ManufacturingInputs, B2CPlatformInputs, CostI
 import { runSimulation, SimulationInputs } from '@/lib/simulation';
 import ScenarioComparisonChart from './ScenarioComparisonChart';
 import ScenarioComparisonTable from './ScenarioComparisonTable';
+import ScenarioSettings, { ScenarioMultipliers } from './ScenarioSettings';
 
 interface ScenarioComparisonProps {
   businessType: BusinessType;
@@ -28,6 +29,34 @@ export default function ScenarioComparison({
   currency,
 }: ScenarioComparisonProps) {
   const [activeTab, setActiveTab] = useState('chart');
+  
+  // 시나리오 조정 비율 설정
+  const [scenarioMultipliers, setScenarioMultipliers] = useState<ScenarioMultipliers>({
+    optimistic: {
+      revenue: 1.2,
+      customers: 1.2,
+      conversion: 1.2,
+      price: 1.1,
+      cost: 0.9,
+      growth: 1.2,
+    },
+    realistic: {
+      revenue: 1.0,
+      customers: 1.0,
+      conversion: 1.0,
+      price: 1.0,
+      cost: 1.0,
+      growth: 1.0,
+    },
+    pessimistic: {
+      revenue: 0.8,
+      customers: 0.8,
+      conversion: 0.8,
+      price: 0.9,
+      cost: 1.1,
+      growth: 0.8,
+    },
+  });
 
   // 시나리오 생성 함수
   const createScenario = useCallback((type: 'optimistic' | 'realistic' | 'pessimistic', multiplier: number) => {
@@ -38,10 +67,12 @@ export default function ScenarioComparison({
       months: 12,
     };
 
-    // 비용 조정
-    inputs.costInputs.marketingCost = Math.round(baseCostInputs.marketingCost * multiplier);
-    inputs.costInputs.personnelCost = Math.round(baseCostInputs.personnelCost * multiplier);
-    inputs.costInputs.otherFixedCosts = Math.round(baseCostInputs.otherFixedCosts * multiplier);
+    const multipliers = scenarioMultipliers[type];
+
+    // 비용 조정 (사용자 정의 비율 적용)
+    inputs.costInputs.marketingCost = Math.round(baseCostInputs.marketingCost * multiplier * multipliers.cost);
+    inputs.costInputs.personnelCost = Math.round(baseCostInputs.personnelCost * multiplier * multipliers.cost);
+    inputs.costInputs.otherFixedCosts = Math.round(baseCostInputs.otherFixedCosts * multiplier * multipliers.cost);
 
     // 비즈니스 모델별 입력 조정
     if (businessType === 'saas' && baseSaasInputs) {
@@ -50,7 +81,7 @@ export default function ScenarioComparison({
         ...funnel,
         steps: funnel.steps.map(step => ({
           ...step,
-          conversionRate: step.conversionRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+          conversionRate: step.conversionRate * multipliers.conversion,
         })),
       }));
 
@@ -58,18 +89,18 @@ export default function ScenarioComparison({
         ...baseSaasInputs.growthRateSettings,
         quarterlyRates: baseSaasInputs.growthRateSettings.quarterlyRates.map(rate => ({
           ...rate,
-          growthRate: rate.growthRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+          growthRate: rate.growthRate * multipliers.growth,
         })),
       };
 
       inputs.saasInputs = {
         ...baseSaasInputs,
-        monthlyVisitors: Math.round(baseSaasInputs.monthlyVisitors * multiplier),
-        visitorToSignupRate: baseSaasInputs.visitorToSignupRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
-        signupToPaidRate: baseSaasInputs.signupToPaidRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+        monthlyVisitors: Math.round(baseSaasInputs.monthlyVisitors * multiplier * multipliers.customers),
+        visitorToSignupRate: baseSaasInputs.visitorToSignupRate * multipliers.conversion,
+        signupToPaidRate: baseSaasInputs.signupToPaidRate * multipliers.conversion,
         monthlyChurnRate: baseSaasInputs.monthlyChurnRate * (type === 'optimistic' ? 0.8 : type === 'pessimistic' ? 1.2 : 1.0),
-        monthlyPrice: Math.round(baseSaasInputs.monthlyPrice * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
-        annualPrice: Math.round(baseSaasInputs.annualPrice * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
+        monthlyPrice: Math.round(baseSaasInputs.monthlyPrice * multipliers.price),
+        annualPrice: Math.round(baseSaasInputs.annualPrice * multipliers.price),
         customFunnels: adjustedCustomFunnels,
         growthRateSettings: adjustedGrowthRates,
       };
@@ -80,16 +111,16 @@ export default function ScenarioComparison({
         ...baseManufacturingInputs.growthRateSettings,
         quarterlyRates: baseManufacturingInputs.growthRateSettings.quarterlyRates.map(rate => ({
           ...rate,
-          growthRate: rate.growthRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+          growthRate: rate.growthRate * multipliers.growth,
         })),
       };
 
       inputs.manufacturingInputs = {
         ...baseManufacturingInputs,
-        monthlySales: Math.round(baseManufacturingInputs.monthlySales * multiplier),
-        unitPrice: Math.round(baseManufacturingInputs.unitPrice * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
-        materialCostPerUnit: Math.round(baseManufacturingInputs.materialCostPerUnit * (type === 'optimistic' ? 0.9 : type === 'pessimistic' ? 1.1 : 1.0)),
-        laborCostPerUnit: Math.round(baseManufacturingInputs.laborCostPerUnit * (type === 'optimistic' ? 0.9 : type === 'pessimistic' ? 1.1 : 1.0)),
+        monthlySales: Math.round(baseManufacturingInputs.monthlySales * multiplier * multipliers.customers),
+        unitPrice: Math.round(baseManufacturingInputs.unitPrice * multipliers.price),
+        materialCostPerUnit: Math.round(baseManufacturingInputs.materialCostPerUnit * multipliers.cost),
+        laborCostPerUnit: Math.round(baseManufacturingInputs.laborCostPerUnit * multipliers.cost),
         growthRateSettings: adjustedGrowthRates,
       };
     }
@@ -99,16 +130,16 @@ export default function ScenarioComparison({
         ...baseB2CPlatformInputs.growthRateSettings,
         quarterlyRates: baseB2CPlatformInputs.growthRateSettings.quarterlyRates.map(rate => ({
           ...rate,
-          growthRate: rate.growthRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+          growthRate: rate.growthRate * multipliers.growth,
         })),
       };
 
       inputs.b2cPlatformInputs = {
         ...baseB2CPlatformInputs,
-        monthlyVisitors: Math.round(baseB2CPlatformInputs.monthlyVisitors * multiplier),
-        visitorToBuyerRate: baseB2CPlatformInputs.visitorToBuyerRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
-        averageOrderValue: Math.round(baseB2CPlatformInputs.averageOrderValue * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
-        takeRate: baseB2CPlatformInputs.takeRate * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0),
+        monthlyVisitors: Math.round(baseB2CPlatformInputs.monthlyVisitors * multiplier * multipliers.customers),
+        visitorToBuyerRate: baseB2CPlatformInputs.visitorToBuyerRate * multipliers.conversion,
+        averageOrderValue: Math.round(baseB2CPlatformInputs.averageOrderValue * multipliers.price),
+        takeRate: baseB2CPlatformInputs.takeRate * multipliers.price,
         refundRate: baseB2CPlatformInputs.refundRate * (type === 'optimistic' ? 0.8 : type === 'pessimistic' ? 1.2 : 1.0),
         growthRateSettings: adjustedGrowthRates,
       };
@@ -136,7 +167,7 @@ export default function ScenarioComparison({
       console.error(`Error running ${type} scenario:`, error);
       return { type, inputs, result: null };
     }
-  }, [businessType, baseSaasInputs, baseManufacturingInputs, baseB2CPlatformInputs, baseCostInputs, startMonth]);
+  }, [businessType, baseSaasInputs, baseManufacturingInputs, baseB2CPlatformInputs, baseCostInputs, startMonth, scenarioMultipliers]);
 
   // 시나리오 생성
   const scenarios = useMemo(() => {
@@ -234,6 +265,7 @@ export default function ScenarioComparison({
         <TabsList>
           <TabsTrigger value="chart">차트 비교</TabsTrigger>
           <TabsTrigger value="table">표 비교</TabsTrigger>
+          <TabsTrigger value="settings">시나리오 설정</TabsTrigger>
         </TabsList>
 
         <TabsContent value="chart">
@@ -247,6 +279,14 @@ export default function ScenarioComparison({
           <ScenarioComparisonTable
             scenarios={scenarios}
             currency={currency}
+            businessType={businessType}
+          />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <ScenarioSettings
+            multipliers={scenarioMultipliers}
+            onMultipliersChange={setScenarioMultipliers}
             businessType={businessType}
           />
         </TabsContent>
