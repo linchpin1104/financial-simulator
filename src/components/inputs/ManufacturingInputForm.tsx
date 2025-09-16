@@ -27,6 +27,10 @@ export default function ManufacturingInputForm({ initialData, onChange, currency
       applyToRevenue: true,
       applyToCustomers: true,
     },
+    quarterlyDetailedSettings: {
+      quarterlyMetrics: [],
+      useDetailedSettings: false,
+    },
     ...initialData,
   });
 

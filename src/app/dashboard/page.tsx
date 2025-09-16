@@ -41,6 +41,10 @@ export default function Dashboard() {
       applyToRevenue: true,
       applyToCustomers: true,
     },
+    quarterlyDetailedSettings: {
+      quarterlyMetrics: [],
+      useDetailedSettings: false,
+    },
   });
   
   const [manufacturingInputs, setManufacturingInputs] = useState<ManufacturingInputs>({
@@ -55,6 +59,10 @@ export default function Dashboard() {
       quarterlyRates: [],
       applyToRevenue: true,
       applyToCustomers: true,
+    },
+    quarterlyDetailedSettings: {
+      quarterlyMetrics: [],
+      useDetailedSettings: false,
     },
   });
   
@@ -79,6 +87,10 @@ export default function Dashboard() {
       applyToRevenue: true,
       applyToCustomers: true,
       applyToOrders: true,
+    },
+    quarterlyDetailedSettings: {
+      quarterlyMetrics: [],
+      useDetailedSettings: false,
     },
   });
   

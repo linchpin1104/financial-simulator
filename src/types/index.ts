@@ -48,12 +48,56 @@ export interface QuarterlyGrowthRate {
   description?: string;
 }
 
+// 분기별 세부 지표 설정
+export interface QuarterlyMetrics {
+  quarter: number; // 1-4
+  year: number;
+  // 전환율
+  conversionRates: {
+    visitorToSignup?: number; // SaaS
+    signupToPaid?: number; // SaaS
+    visitorToBuyer?: number; // B2C
+    buyerToRepeat?: number; // B2C
+  };
+  // 가격
+  pricing: {
+    monthlyPrice?: number; // SaaS
+    annualPrice?: number; // SaaS
+    unitPrice?: number; // 제조/유통
+    averageOrderValue?: number; // B2C
+  };
+  // 비용 구조
+  costs: {
+    marketingCost: number;
+    personnelCost: number;
+    otherFixedCosts: number;
+    materialCostPerUnit?: number; // 제조/유통
+    laborCostPerUnit?: number; // 제조/유통
+    shippingCostPerUnit?: number; // 제조/유통
+  };
+  // 기타 지표
+  metrics: {
+    monthlyVisitors?: number;
+    monthlySales?: number; // 제조/유통
+    churnRate?: number; // SaaS
+    refundRate?: number; // B2C
+    takeRate?: number; // B2C
+  };
+  description?: string;
+}
+
 // 성장률 설정
 export interface GrowthRateSettings {
   quarterlyRates: QuarterlyGrowthRate[];
   applyToRevenue: boolean;
   applyToCustomers: boolean;
   applyToOrders?: boolean; // B2C 플랫폼에서만
+}
+
+// 분기별 세부 설정
+export interface QuarterlyDetailedSettings {
+  quarterlyMetrics: QuarterlyMetrics[];
+  useDetailedSettings: boolean; // 세부 설정 사용 여부
 }
 
 // SaaS 모드 입력 데이터
@@ -71,6 +115,8 @@ export interface SaasInputs {
   activeFunnelId?: string;
   // 성장률 설정
   growthRateSettings: GrowthRateSettings;
+  // 분기별 세부 설정
+  quarterlyDetailedSettings: QuarterlyDetailedSettings;
 }
 
 // 제조/유통 모드 입력 데이터
@@ -84,6 +130,8 @@ export interface ManufacturingInputs {
   otherVariableCostPerUnit: number;
   // 성장률 설정
   growthRateSettings: GrowthRateSettings;
+  // 분기별 세부 설정
+  quarterlyDetailedSettings: QuarterlyDetailedSettings;
 }
 
 // 공급자(판매자) 정보
@@ -109,6 +157,8 @@ export interface B2CPlatformInputs {
   suppliers: SupplierInfo;
   // 성장률 설정
   growthRateSettings: GrowthRateSettings;
+  // 분기별 세부 설정
+  quarterlyDetailedSettings: QuarterlyDetailedSettings;
 }
 
 // 비용 데이터
@@ -139,6 +189,21 @@ export interface MonthlyResult {
   signups?: number;
   paidCustomers?: number;
   mrr?: number;
+  channelData?: {
+    channels: Array<ChannelInfo & { visitors: number; cost: number }>;
+    totalCost: number;
+    totalVisitors: number;
+  };
+  
+  // B2C 플랫폼 전용
+  supplierData?: {
+    activeSuppliers: number;
+    totalListings: number;
+    totalRevenue: number;
+    estimatedOrders: number;
+    averageRevenuePerSupplier: number;
+    averageListingsPerSupplier: number;
+  };
   
   // 제조/유통 전용
   sales?: number;

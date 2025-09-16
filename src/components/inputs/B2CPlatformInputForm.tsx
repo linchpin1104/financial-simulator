@@ -37,6 +37,10 @@ export default function B2CPlatformInputForm({ initialData, onChange, currency }
       applyToCustomers: true,
       applyToOrders: true,
     },
+    quarterlyDetailedSettings: {
+      quarterlyMetrics: [],
+      useDetailedSettings: false,
+    },
     ...initialData,
   });
 

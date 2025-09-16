@@ -38,6 +38,10 @@ export default function SaasInputForm({ initialData, onChange, currency }: SaasI
       applyToRevenue: true,
       applyToCustomers: true,
     },
+    quarterlyDetailedSettings: {
+      quarterlyMetrics: [],
+      useDetailedSettings: false,
+    },
     ...initialData,
   });
 

@@ -1,5 +1,6 @@
 import { ManufacturingInputs, CostInputs, SimulationResult, MonthlyResult, SummaryResult } from '@/types';
 import { applyGrowthRates } from './growthRateCalculator';
+import { applyQuarterlyDetailedSettings } from './quarterlyDetailedCalculator';
 
 export function runManufacturingSimulation(
   manufacturingInputs: ManufacturingInputs,
@@ -23,11 +24,27 @@ export function runManufacturingSimulation(
       manufacturingInputs.growthRateSettings
     ).customers;
     
-    // 판매량 계산 (생산 능력 제한 고려)
-    const actualSales = Math.min(growthAdjustedSales, manufacturingInputs.productionCapacity);
+    // 분기별 세부 설정 적용
+    const quarterlyAdjustedMetrics = applyQuarterlyDetailedSettings(
+      i,
+      manufacturingInputs.quarterlyDetailedSettings,
+      'manufacturing',
+      {
+        price: manufacturingInputs.unitPrice,
+        sales: growthAdjustedSales,
+        cost: manufacturingInputs.materialCostPerUnit,
+      }
+    );
+
+    // 조정된 판매량 사용
+    const adjustedSales = quarterlyAdjustedMetrics.sales || growthAdjustedSales;
     
-    // 매출 계산
-    const monthlyRevenue = actualSales * manufacturingInputs.unitPrice;
+    // 판매량 계산 (생산 능력 제한 고려)
+    const actualSales = Math.min(adjustedSales, manufacturingInputs.productionCapacity);
+    
+    // 매출 계산 (분기별 조정된 가격 사용)
+    const adjustedPrice = quarterlyAdjustedMetrics.price || manufacturingInputs.unitPrice;
+    const monthlyRevenue = actualSales * adjustedPrice;
     
     // 성장률 적용된 매출
     const growthAdjustedRevenue = applyGrowthRates(
