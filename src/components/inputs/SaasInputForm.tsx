@@ -227,53 +227,69 @@ export default function SaasInputForm({ initialData, onChange, currency }: SaasI
         </CardContent>
       </Card>
 
-      {/* 전환율 */}
+      {/* 맞춤형 퍼널 설정 */}
       <Card>
         <CardHeader>
-          <CardTitle>전환율</CardTitle>
-          <CardDescription>방문자 → 회원 → 유료 고객 전환 과정</CardDescription>
+          <CardTitle>맞춤형 퍼널 설정</CardTitle>
+          <CardDescription>회사별 맞춤형 퍼널을 설정하고 각 단계별 전환율을 입력하세요. (최대 5개 단계)</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label>방문자 → 회원 가입율</Label>
-            <div className="mt-2">
-              <Slider
-                value={[data.visitorToSignupRate * 100]}
-                onValueChange={([value]) => updateData({ visitorToSignupRate: value / 100 })}
-                max={20}
-                step={0.1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-gray-600 mt-1">
-                <span>0%</span>
-                <span className="font-medium">{formatPercent(data.visitorToSignupRate)}</span>
-                <span>20%</span>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              월간 {Math.round(data.monthlyVisitors * data.visitorToSignupRate).toLocaleString()}명이 회원가입합니다
-            </p>
-          </div>
+        <CardContent>
+          <div className="space-y-4">
+            {/* 기본 전환율 설정 */}
+            <div className="p-4 border rounded-lg bg-gray-50">
+              <h4 className="font-medium mb-3">기본 전환율 설정</h4>
+              <div className="space-y-4">
+                <div>
+                  <Label>방문자 → 회원 가입율</Label>
+                  <div className="mt-2">
+                    <Slider
+                      value={[data.visitorToSignupRate * 100]}
+                      onValueChange={([value]) => updateData({ visitorToSignupRate: value / 100 })}
+                      max={20}
+                      step={0.1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-sm text-gray-600 mt-1">
+                      <span>0%</span>
+                      <span className="font-medium">{formatPercent(data.visitorToSignupRate)}</span>
+                      <span>20%</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    월간 {Math.round(data.monthlyVisitors * data.visitorToSignupRate).toLocaleString()}명이 회원가입합니다
+                  </p>
+                </div>
 
-          <div>
-            <Label>회원 → 유료 고객 전환율</Label>
-            <div className="mt-2">
-              <Slider
-                value={[data.signupToPaidRate * 100]}
-                onValueChange={([value]) => updateData({ signupToPaidRate: value / 100 })}
-                max={50}
-                step={0.1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-gray-600 mt-1">
-                <span>0%</span>
-                <span className="font-medium">{formatPercent(data.signupToPaidRate)}</span>
-                <span>50%</span>
+                <div>
+                  <Label>회원 → 유료 고객 전환율</Label>
+                  <div className="mt-2">
+                    <Slider
+                      value={[data.signupToPaidRate * 100]}
+                      onValueChange={([value]) => updateData({ signupToPaidRate: value / 100 })}
+                      max={50}
+                      step={0.1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-sm text-gray-600 mt-1">
+                      <span>0%</span>
+                      <span className="font-medium">{formatPercent(data.signupToPaidRate)}</span>
+                      <span>50%</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    월간 {Math.round(data.monthlyVisitors * data.visitorToSignupRate * data.signupToPaidRate).toLocaleString()}명이 유료 고객이 됩니다
+                  </p>
+                </div>
               </div>
             </div>
-            <p className="text-sm text-gray-600 mt-1">
-              월간 {Math.round(data.monthlyVisitors * data.visitorToSignupRate * data.signupToPaidRate).toLocaleString()}명이 유료 고객이 됩니다
-            </p>
+
+            {/* 맞춤형 퍼널 설정 */}
+            <CustomFunnelSettings
+              funnels={data.customFunnels}
+              onFunnelsChange={(funnels) => updateData({ customFunnels: funnels })}
+              activeFunnelId={data.activeFunnelId}
+              onActiveFunnelChange={(funnelId) => updateData({ activeFunnelId: funnelId })}
+            />
           </div>
         </CardContent>
       </Card>

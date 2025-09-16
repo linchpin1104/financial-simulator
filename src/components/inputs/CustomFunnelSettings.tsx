@@ -124,7 +124,8 @@ export default function CustomFunnelSettings({
       <CardHeader>
         <CardTitle>맞춤형 퍼널 설정</CardTitle>
         <CardDescription>
-          회사별 맞춤형 퍼널을 설정하고 각 단계별 전환율을 입력하세요. (최대 5개 단계)
+          기본 전환율 대신 맞춤형 퍼널을 사용하여 더 정교한 전환 과정을 모델링할 수 있습니다.
+          퍼널을 활성화하면 기본 전환율 대신 퍼널의 전환율이 사용됩니다.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
