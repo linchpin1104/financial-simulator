@@ -89,6 +89,10 @@ export function runManufacturingSimulation(
     };
   }
   
+  // LTV/CAC 계산
+  const ltv = calculateManufacturingLTV(manufacturingInputs);
+  const cac = calculateManufacturingCAC(manufacturingInputs, costInputs);
+
   // 요약 결과
   const summary: SummaryResult = {
     totalRevenue,
@@ -96,12 +100,42 @@ export function runManufacturingSimulation(
     totalCosts,
     netProfit: totalRevenue - totalCosts,
     averageProfitMargin: totalRevenue > 0 ? (totalRevenue - totalCosts) / totalRevenue : 0,
+    ltv,
+    cac,
   };
   
   return {
     monthly: monthlyResults,
     summary,
   };
+}
+
+function calculateManufacturingLTV(manufacturingInputs: ManufacturingInputs): number {
+  // Manufacturing LTV = 단위당 마진 × 고객당 평균 구매량 × 고객 생존 기간
+  const unitPrice = manufacturingInputs.unitPrice;
+  const materialCost = manufacturingInputs.materialCostPerUnit;
+  const laborCost = manufacturingInputs.laborCostPerUnit;
+  const shippingCost = manufacturingInputs.shippingCostPerUnit;
+  const otherVariableCost = manufacturingInputs.otherVariableCostPerUnit;
+  
+  const unitMargin = unitPrice - (materialCost + laborCost + shippingCost + otherVariableCost);
+  const monthlySales = manufacturingInputs.monthlySales;
+  const customerLifespan = 12; // 제조업은 일반적으로 1년으로 가정
+  
+  return unitMargin * monthlySales * customerLifespan;
+}
+
+function calculateManufacturingCAC(manufacturingInputs: ManufacturingInputs, costInputs: CostInputs): number {
+  // Manufacturing CAC = 마케팅 비용 / 신규 고객 수
+  const monthlySales = manufacturingInputs.monthlySales;
+  const monthlyNewCustomers = Math.round(monthlySales); // 제조업에서는 판매량이 고객 수와 유사
+  
+  if (monthlyNewCustomers === 0) return 0;
+  
+  // 마케팅 비용
+  const totalMarketingCost = costInputs.marketingCost;
+  
+  return totalMarketingCost / monthlyNewCustomers;
 }
 
 function getMonthString(startMonth: string, offset: number): string {

@@ -250,8 +250,13 @@ export function compareWithBenchmarks(
   const improvements: string[] = [];
   
   // 전환율 비교
+  const monthlyData = Object.values(result.monthly);
+  
   if (businessType === 'saas' && benchmark.metrics.conversionRates.visitorToSignup) {
-    const current = 0.05; // 실제로는 시뮬레이션 결과에서 가져와야 함
+    // SaaS: 방문자 → 가입 전환율
+    const totalVisitors = monthlyData.reduce((sum, month) => sum + (month.visitors || 0), 0);
+    const totalSignups = monthlyData.reduce((sum, month) => sum + (month.signups || 0), 0);
+    const current = totalVisitors > 0 ? totalSignups / totalVisitors : 0;
     const benchmarkValue = benchmark.metrics.conversionRates.visitorToSignup;
     const difference = current - benchmarkValue;
     const status = Math.abs(difference) < 0.01 ? 'similar' : difference > 0 ? 'above' : 'below';
@@ -273,8 +278,54 @@ export function compareWithBenchmarks(
     if (status === 'below') improvements.push('전환율 개선');
   }
   
+  if (businessType === 'b2c-platform' && benchmark.metrics.conversionRates.visitorToBuyer) {
+    // B2C Platform: 방문자 → 구매자 전환율
+    const totalVisitors = monthlyData.reduce((sum, month) => sum + (month.visitors || 0), 0);
+    const totalCustomers = monthlyData.reduce((sum, month) => sum + (month.customers || 0), 0);
+    const current = totalVisitors > 0 ? totalCustomers / totalVisitors : 0;
+    const benchmarkValue = benchmark.metrics.conversionRates.visitorToBuyer;
+    const difference = current - benchmarkValue;
+    const status = Math.abs(difference) < 0.01 ? 'similar' : difference > 0 ? 'above' : 'below';
+    
+    comparisons.push({
+      metric: '방문자 → 구매자 전환율',
+      current: current * 100,
+      benchmark: benchmarkValue * 100,
+      difference: difference * 100,
+      status,
+      recommendation: status === 'below' 
+        ? '전환율 개선을 위한 상품 페이지 최적화가 필요합니다.'
+        : status === 'above'
+        ? '우수한 전환율을 보이고 있습니다.'
+        : '업계 평균 수준입니다.',
+    });
+    
+    if (status === 'above') strengths.push('높은 전환율');
+    if (status === 'below') improvements.push('전환율 개선');
+  }
+  
   // 이탈률 비교
-  const currentChurn = 0.03; // 실제로는 시뮬레이션 결과에서 가져와야 함
+  // 실제 시뮬레이션 결과에서 이탈률 계산
+  let currentChurn = 0.03; // 기본값
+  if (monthlyData.length > 1) {
+    if (businessType === 'saas') {
+      // SaaS: 월간 이탈률의 평균 계산
+      const churnRates = monthlyData.slice(1).map((month, index) => {
+        const prevMonth = monthlyData[index];
+        const churned = (prevMonth.paidCustomers || 0) - (month.paidCustomers || 0);
+        return (prevMonth.paidCustomers || 0) > 0 ? churned / (prevMonth.paidCustomers || 0) : 0;
+      });
+      currentChurn = churnRates.reduce((sum, rate) => sum + rate, 0) / churnRates.length;
+    } else if (businessType === 'b2c-platform') {
+      // B2C Platform: 고객 이탈률 계산
+      const churnRates = monthlyData.slice(1).map((month, index) => {
+        const prevMonth = monthlyData[index];
+        const churned = (prevMonth.customers || 0) - (month.customers || 0);
+        return (prevMonth.customers || 0) > 0 ? churned / (prevMonth.customers || 0) : 0;
+      });
+      currentChurn = churnRates.reduce((sum, rate) => sum + rate, 0) / churnRates.length;
+    }
+  }
   const benchmarkChurn = benchmark.metrics.churnRates.monthly;
   const churnDifference = currentChurn - benchmarkChurn;
   const churnStatus = Math.abs(churnDifference) < 0.01 ? 'similar' : churnDifference < 0 ? 'above' : 'below';

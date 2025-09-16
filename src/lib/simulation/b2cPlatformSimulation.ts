@@ -119,6 +119,10 @@ export function runB2CPlatformSimulation(
     };
   }
   
+  // LTV/CAC 계산
+  const ltv = calculateB2CLTV(b2cInputs);
+  const cac = calculateB2CCAC(b2cInputs, costInputs);
+
   // 요약 결과
   const summary: SummaryResult = {
     totalRevenue: totalPlatformRevenue,
@@ -131,6 +135,8 @@ export function runB2CPlatformSimulation(
     averageProfitMargin: totalPlatformRevenue > 0 ? (totalPlatformRevenue - totalCosts) / totalPlatformRevenue : 0,
     averageTakeRate: b2cInputs.takeRate,
     totalRefunds,
+    ltv,
+    cac,
   };
   
   return {
@@ -138,6 +144,36 @@ export function runB2CPlatformSimulation(
     summary,
   };
 }
+
+function calculateB2CLTV(b2cInputs: B2CPlatformInputs): number {
+  // B2C Platform LTV = (평균 주문 가치 × 월간 주문 수 × 고객 생존 기간) × 테이크레이트
+  const averageOrderValue = b2cInputs.averageOrderValue;
+  const ordersPerMonth = b2cInputs.ordersPerBuyerPerMonth;
+  const monthlyChurnRate = b2cInputs.refundRate; // 환불률을 이탈률로 간주
+  const takeRate = b2cInputs.takeRate;
+  
+  if (monthlyChurnRate >= 1) return 0; // 100% 이탈률인 경우
+  
+  const customerLifespan = monthlyChurnRate > 0 ? 1 / monthlyChurnRate : 12; // 월 단위
+  const monthlyRevenue = averageOrderValue * ordersPerMonth * takeRate;
+  
+  return monthlyRevenue * customerLifespan;
+}
+
+function calculateB2CCAC(b2cInputs: B2CPlatformInputs, costInputs: CostInputs): number {
+  // B2C Platform CAC = 마케팅 비용 / 신규 고객 수
+  const monthlyVisitors = b2cInputs.monthlyVisitors;
+  const conversionRate = b2cInputs.visitorToBuyerRate;
+  const monthlyNewCustomers = Math.round(monthlyVisitors * conversionRate);
+  
+  if (monthlyNewCustomers === 0) return 0;
+  
+  // 마케팅 비용 (월간 마케팅 비용 사용)
+  const totalMarketingCost = costInputs.marketingCost;
+  
+  return totalMarketingCost / monthlyNewCustomers;
+}
+
 
 function getMonthString(startMonth: string, offset: number): string {
   const [year, month] = startMonth.split('-').map(Number);
