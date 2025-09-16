@@ -23,6 +23,11 @@ export default function Dashboard() {
   // 입력 데이터 상태
   const [saasInputs, setSaasInputs] = useState<SaasInputs>({
     monthlyVisitors: 10000,
+    channels: [
+      { name: '자연 검색', percentage: 0.4, costPerVisitor: 0 },
+      { name: '광고', percentage: 0.4, costPerVisitor: 2 },
+      { name: '추천', percentage: 0.2, costPerVisitor: 0 },
+    ],
     visitorToSignupRate: 0.05,
     signupToPaidRate: 0.08,
     monthlyChurnRate: 0.03,
@@ -51,6 +56,12 @@ export default function Dashboard() {
     takeRate: 0.08,
     fixedFeePerOrder: 2,
     adRevenuePerMonth: 5000,
+    suppliers: {
+      newSuppliersPerMonth: 50,
+      activeSuppliers: 200,
+      averageListingsPerSupplier: 10,
+      averageRevenuePerSupplier: 500,
+    },
   });
   
   const [costInputs, setCostInputs] = useState<CostInputs>({
@@ -63,10 +74,12 @@ export default function Dashboard() {
 
   // 시뮬레이션 결과 계산
   const simulationResult = useMemo(() => {
+    if (!onboarding) return null;
+    
     const inputs: SimulationInputs = {
       businessType: currentBusinessType || 'saas',
       costInputs,
-      startMonth: onboarding.startMonth,
+      startMonth: onboardingData.startMonth,
       months: 12,
     };
 
@@ -97,6 +110,9 @@ export default function Dashboard() {
   if (!isOnboardingComplete || !onboarding) {
     return null;
   }
+
+  // TypeScript가 onboarding이 null이 아님을 인식하도록 타입 단언
+  const onboardingData = onboarding as NonNullable<typeof onboarding>;
 
   const getBusinessTypeInfo = (type: string) => {
     switch (type) {
