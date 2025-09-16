@@ -1,4 +1,5 @@
 import { B2CPlatformInputs, CostInputs, SimulationResult, MonthlyResult, SummaryResult } from '@/types';
+import { applyGrowthRates } from './growthRateCalculator';
 
 export function runB2CPlatformSimulation(
   b2cInputs: B2CPlatformInputs,
@@ -17,20 +18,41 @@ export function runB2CPlatformSimulation(
   for (let i = 0; i < months; i++) {
     const currentMonth = getMonthString(startMonth, i);
     
+    // 성장률 적용된 방문자 수
+    const growthAdjustedVisitors = applyGrowthRates(
+      { customers: b2cInputs.monthlyVisitors },
+      i,
+      b2cInputs.growthRateSettings
+    ).customers;
+    
     // 구매자 및 주문 계산
-    const monthlyBuyers = Math.round(b2cInputs.monthlyVisitors * b2cInputs.visitorToBuyerRate);
+    const monthlyBuyers = Math.round(growthAdjustedVisitors * b2cInputs.visitorToBuyerRate);
     const monthlyOrders = Math.round(monthlyBuyers * b2cInputs.ordersPerBuyerPerMonth);
     
-    // GMV 계산
-    const monthlyGmv = monthlyOrders * b2cInputs.averageOrderValue;
+    // 성장률 적용된 주문 수
+    const growthAdjustedOrders = applyGrowthRates(
+      { orders: monthlyOrders },
+      i,
+      b2cInputs.growthRateSettings
+    ).orders || monthlyOrders;
     
-    // 환불 계산
-    const monthlyRefunds = monthlyGmv * b2cInputs.refundRate;
-    const netGmv = monthlyGmv - monthlyRefunds;
+    // GMV 계산
+    const monthlyGmv = growthAdjustedOrders * b2cInputs.averageOrderValue;
+    
+    // 성장률 적용된 GMV
+    const growthAdjustedGmv = applyGrowthRates(
+      { revenue: monthlyGmv },
+      i,
+      b2cInputs.growthRateSettings
+    ).revenue;
+    
+    // 환불 계산 (성장률 적용된 GMV 기준)
+    const monthlyRefunds = growthAdjustedGmv * b2cInputs.refundRate;
+    const netGmv = growthAdjustedGmv - monthlyRefunds;
     
     // 플랫폼 매출 계산
     const takeRateRevenue = netGmv * b2cInputs.takeRate;
-    const fixedFeeRevenue = monthlyOrders * b2cInputs.fixedFeePerOrder;
+    const fixedFeeRevenue = growthAdjustedOrders * b2cInputs.fixedFeePerOrder;
     const adRevenue = b2cInputs.adRevenuePerMonth;
     const platformRevenue = takeRateRevenue + fixedFeeRevenue + adRevenue;
     
@@ -44,16 +66,16 @@ export function runB2CPlatformSimulation(
     
     // 누적 계산
     totalCosts += totalMonthlyCosts;
-    totalOrders += monthlyOrders;
-    totalGmv += monthlyGmv;
+    totalOrders += Math.round(growthAdjustedOrders);
+    totalGmv += growthAdjustedGmv;
     totalPlatformRevenue += platformRevenue;
     totalRefunds += monthlyRefunds;
     
     monthlyResults[currentMonth] = {
       revenue: platformRevenue,
       customers: monthlyBuyers,
-      orders: monthlyOrders,
-      gmv: monthlyGmv,
+      orders: Math.round(growthAdjustedOrders),
+      gmv: growthAdjustedGmv,
       platformRevenue,
       totalCosts: totalMonthlyCosts,
       netProfit,

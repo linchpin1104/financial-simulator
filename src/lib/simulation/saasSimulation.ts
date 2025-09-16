@@ -1,4 +1,6 @@
 import { SaasInputs, CostInputs, SimulationResult, MonthlyResult, SummaryResult } from '@/types';
+import { calculateFunnelConversion } from './funnelCalculator';
+import { applyGrowthRates } from './growthRateCalculator';
 
 export function runSaasSimulation(
   saasInputs: SaasInputs,
@@ -16,8 +18,29 @@ export function runSaasSimulation(
   for (let i = 0; i < months; i++) {
     const currentMonth = getMonthString(startMonth, i);
     
-    // 고객 계산
-    const newSignups = Math.round(saasInputs.monthlyVisitors * saasInputs.visitorToSignupRate);
+    // 성장률 적용된 방문자 수
+    const growthAdjustedVisitors = applyGrowthRates(
+      { customers: saasInputs.monthlyVisitors },
+      i,
+      saasInputs.growthRateSettings
+    ).customers;
+    
+    // 맞춤형 퍼널 적용 (현재는 사용하지 않지만 향후 확장 가능)
+    // const funnelConversionRate = getFunnelConversionRate(
+    //   saasInputs.customFunnels,
+    //   saasInputs.activeFunnelId
+    // );
+    
+    // 고객 계산 (퍼널 적용)
+    const newSignups = Math.round(
+      calculateFunnelConversion(
+        growthAdjustedVisitors,
+        saasInputs.customFunnels,
+        saasInputs.activeFunnelId,
+        saasInputs.visitorToSignupRate
+      )
+    );
+    
     const newPaidCustomers = Math.round(newSignups * saasInputs.signupToPaidRate);
     const churnedCustomers = Math.round(activeCustomers * saasInputs.monthlyChurnRate);
     
@@ -28,23 +51,30 @@ export function runSaasSimulation(
     const annualRevenue = activeCustomers * saasInputs.annualPrice * (1 - saasInputs.annualDiscountRate) / 12;
     const totalMonthlyRevenue = monthlyRevenue + annualRevenue;
     
-    // 비용 계산
-    const paymentFee = totalMonthlyRevenue * costInputs.paymentFeeRate;
+    // 성장률 적용된 매출
+    const growthAdjustedRevenue = applyGrowthRates(
+      { revenue: totalMonthlyRevenue },
+      i,
+      saasInputs.growthRateSettings
+    ).revenue;
+    
+    // 비용 계산 (성장률 적용된 매출 기준)
+    const paymentFee = growthAdjustedRevenue * costInputs.paymentFeeRate;
     const totalMonthlyCosts = costInputs.marketingCost + costInputs.personnelCost + costInputs.otherFixedCosts + paymentFee;
     
     // 순이익 계산
-    const netProfit = totalMonthlyRevenue - totalMonthlyCosts;
-    const profitMargin = totalMonthlyRevenue > 0 ? netProfit / totalMonthlyRevenue : 0;
+    const netProfit = growthAdjustedRevenue - totalMonthlyCosts;
+    const profitMargin = growthAdjustedRevenue > 0 ? netProfit / growthAdjustedRevenue : 0;
     
     // 누적 계산
-    totalRevenue += totalMonthlyRevenue;
+    totalRevenue += growthAdjustedRevenue;
     totalCosts += totalMonthlyCosts;
     totalCustomers += newPaidCustomers;
     
     monthlyResults[currentMonth] = {
-      revenue: totalMonthlyRevenue,
+      revenue: growthAdjustedRevenue,
       customers: activeCustomers,
-      visitors: saasInputs.monthlyVisitors,
+      visitors: Math.round(growthAdjustedVisitors),
       signups: newSignups,
       paidCustomers: newPaidCustomers,
       mrr: monthlyRevenue,

@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BusinessType, SaasInputs, ManufacturingInputs, B2CPlatformInputs, CostInputs } from '@/types';
+import { BusinessType, SaasInputs, ManufacturingInputs, B2CPlatformInputs, CostInputs, GrowthRateSettings } from '@/types';
 import { runSimulation, SimulationInputs } from '@/lib/simulation';
 import ScenarioComparisonChart from './ScenarioComparisonChart';
 import ScenarioComparisonTable from './ScenarioComparisonTable';
@@ -45,6 +45,23 @@ export default function ScenarioComparison({
 
     // 비즈니스 모델별 입력 조정
     if (businessType === 'saas' && baseSaasInputs) {
+      // 맞춤형 퍼널과 성장률 설정을 포함하여 복사
+      const adjustedCustomFunnels = baseSaasInputs.customFunnels.map(funnel => ({
+        ...funnel,
+        steps: funnel.steps.map(step => ({
+          ...step,
+          conversionRate: step.conversionRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+        })),
+      }));
+
+      const adjustedGrowthRates: GrowthRateSettings = {
+        ...baseSaasInputs.growthRateSettings,
+        quarterlyRates: baseSaasInputs.growthRateSettings.quarterlyRates.map(rate => ({
+          ...rate,
+          growthRate: rate.growthRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+        })),
+      };
+
       inputs.saasInputs = {
         ...baseSaasInputs,
         monthlyVisitors: Math.round(baseSaasInputs.monthlyVisitors * multiplier),
@@ -53,20 +70,39 @@ export default function ScenarioComparison({
         monthlyChurnRate: baseSaasInputs.monthlyChurnRate * (type === 'optimistic' ? 0.8 : type === 'pessimistic' ? 1.2 : 1.0),
         monthlyPrice: Math.round(baseSaasInputs.monthlyPrice * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
         annualPrice: Math.round(baseSaasInputs.annualPrice * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
+        customFunnels: adjustedCustomFunnels,
+        growthRateSettings: adjustedGrowthRates,
       };
     }
 
     if (businessType === 'manufacturing' && baseManufacturingInputs) {
+      const adjustedGrowthRates: GrowthRateSettings = {
+        ...baseManufacturingInputs.growthRateSettings,
+        quarterlyRates: baseManufacturingInputs.growthRateSettings.quarterlyRates.map(rate => ({
+          ...rate,
+          growthRate: rate.growthRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+        })),
+      };
+
       inputs.manufacturingInputs = {
         ...baseManufacturingInputs,
         monthlySales: Math.round(baseManufacturingInputs.monthlySales * multiplier),
         unitPrice: Math.round(baseManufacturingInputs.unitPrice * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
         materialCostPerUnit: Math.round(baseManufacturingInputs.materialCostPerUnit * (type === 'optimistic' ? 0.9 : type === 'pessimistic' ? 1.1 : 1.0)),
         laborCostPerUnit: Math.round(baseManufacturingInputs.laborCostPerUnit * (type === 'optimistic' ? 0.9 : type === 'pessimistic' ? 1.1 : 1.0)),
+        growthRateSettings: adjustedGrowthRates,
       };
     }
 
     if (businessType === 'b2c-platform' && baseB2CPlatformInputs) {
+      const adjustedGrowthRates: GrowthRateSettings = {
+        ...baseB2CPlatformInputs.growthRateSettings,
+        quarterlyRates: baseB2CPlatformInputs.growthRateSettings.quarterlyRates.map(rate => ({
+          ...rate,
+          growthRate: rate.growthRate * (type === 'optimistic' ? 1.2 : type === 'pessimistic' ? 0.8 : 1.0),
+        })),
+      };
+
       inputs.b2cPlatformInputs = {
         ...baseB2CPlatformInputs,
         monthlyVisitors: Math.round(baseB2CPlatformInputs.monthlyVisitors * multiplier),
@@ -74,6 +110,7 @@ export default function ScenarioComparison({
         averageOrderValue: Math.round(baseB2CPlatformInputs.averageOrderValue * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0)),
         takeRate: baseB2CPlatformInputs.takeRate * (type === 'optimistic' ? 1.1 : type === 'pessimistic' ? 0.9 : 1.0),
         refundRate: baseB2CPlatformInputs.refundRate * (type === 'optimistic' ? 0.8 : type === 'pessimistic' ? 1.2 : 1.0),
+        growthRateSettings: adjustedGrowthRates,
       };
     }
 

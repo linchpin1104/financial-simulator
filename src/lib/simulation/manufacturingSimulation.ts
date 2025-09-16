@@ -1,4 +1,5 @@
 import { ManufacturingInputs, CostInputs, SimulationResult, MonthlyResult, SummaryResult } from '@/types';
+import { applyGrowthRates } from './growthRateCalculator';
 
 export function runManufacturingSimulation(
   manufacturingInputs: ManufacturingInputs,
@@ -15,11 +16,25 @@ export function runManufacturingSimulation(
   for (let i = 0; i < months; i++) {
     const currentMonth = getMonthString(startMonth, i);
     
+    // 성장률 적용된 판매량
+    const growthAdjustedSales = applyGrowthRates(
+      { customers: manufacturingInputs.monthlySales },
+      i,
+      manufacturingInputs.growthRateSettings
+    ).customers;
+    
     // 판매량 계산 (생산 능력 제한 고려)
-    const actualSales = Math.min(manufacturingInputs.monthlySales, manufacturingInputs.productionCapacity);
+    const actualSales = Math.min(growthAdjustedSales, manufacturingInputs.productionCapacity);
     
     // 매출 계산
     const monthlyRevenue = actualSales * manufacturingInputs.unitPrice;
+    
+    // 성장률 적용된 매출
+    const growthAdjustedRevenue = applyGrowthRates(
+      { revenue: monthlyRevenue },
+      i,
+      manufacturingInputs.growthRateSettings
+    ).revenue;
     
     // 원가 계산
     const materialCost = actualSales * manufacturingInputs.materialCostPerUnit;
@@ -28,27 +43,27 @@ export function runManufacturingSimulation(
     const otherVariableCost = actualSales * manufacturingInputs.otherVariableCostPerUnit;
     const costOfGoodsSold = materialCost + laborCost + shippingCost + otherVariableCost;
     
-    // 총 비용 계산
-    const paymentFee = monthlyRevenue * costInputs.paymentFeeRate;
+    // 총 비용 계산 (성장률 적용된 매출 기준)
+    const paymentFee = growthAdjustedRevenue * costInputs.paymentFeeRate;
     const totalMonthlyCosts = costInputs.marketingCost + costInputs.personnelCost + costInputs.otherFixedCosts + costOfGoodsSold + paymentFee;
     
     // 마진 계산
-    const grossMargin = monthlyRevenue - costOfGoodsSold;
+    const grossMargin = growthAdjustedRevenue - costOfGoodsSold;
     
     // 순이익 계산
-    const netProfit = monthlyRevenue - totalMonthlyCosts;
-    const profitMargin = monthlyRevenue > 0 ? netProfit / monthlyRevenue : 0;
+    const netProfit = growthAdjustedRevenue - totalMonthlyCosts;
+    const profitMargin = growthAdjustedRevenue > 0 ? netProfit / growthAdjustedRevenue : 0;
     
     // 누적 계산
-    totalRevenue += monthlyRevenue;
+    totalRevenue += growthAdjustedRevenue;
     totalCosts += totalMonthlyCosts;
     totalSales += actualSales;
     
     monthlyResults[currentMonth] = {
-      revenue: monthlyRevenue,
-      customers: actualSales, // 제조업에서는 판매량이 고객 수와 유사
-      sales: actualSales,
-      production: actualSales,
+      revenue: growthAdjustedRevenue,
+      customers: Math.round(actualSales), // 제조업에서는 판매량이 고객 수와 유사
+      sales: Math.round(actualSales),
+      production: Math.round(actualSales),
       costOfGoodsSold,
       grossMargin,
       totalCosts: totalMonthlyCosts,
