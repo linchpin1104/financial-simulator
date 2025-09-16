@@ -1,4 +1,4 @@
-import { MonthlyResult, SummaryResult, CostInputs } from '@/types';
+import { MonthlyResult, CostInputs } from '@/types';
 
 /**
  * 비용 구조 분석 결과 타입

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2C Platform 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .expected { background-color: #e8f5e8; }
+        .actual { background-color: #fff3cd; }
+        .error { background-color: #f8d7da; }
+        .success { background-color: #d4edda; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>B2C Platform 비즈니스 모델 테스트</h1>
+    
+    <div class="test-section">
+        <h2>입력 데이터</h2>
+        <ul>
+            <li>회사명: TestB2C Platform</li>
+            <li>시작월: 2024-01</li>
+            <li>통화: KRW</li>
+            <li>비즈니스 타입: B2C Platform</li>
+            <li>월간 방문자: 50,000명</li>
+            <li>방문자→구매자 전환율: 2%</li>
+            <li>구매자→재구매 전환율: 25%</li>
+            <li>월간 주문 수: 2회</li>
+            <li>평균 주문 가치: 30,000원</li>
+            <li>환불률: 5%</li>
+            <li>테이크레이트: 10%</li>
+            <li>주문당 고정 수수료: 1,000원</li>
+            <li>월간 광고 수익: 500,000원</li>
+        </ul>
+    </div>
+
+    <div class="test-section expected">
+        <h2>예상 결과 (1월)</h2>
+        <table>
+            <tr><th>항목</th><th>예상값</th><th>계산식</th></tr>
+            <tr><td>신규 구매자</td><td>1,000명</td><td>50,000 × 0.02</td></tr>
+            <tr><td>월간 주문 수</td><td>2,000주문</td><td>1,000 × 2</td></tr>
+            <tr><td>GMV</td><td>60,000,000원</td><td>2,000 × 30,000</td></tr>
+            <tr><td>환불</td><td>3,000,000원</td><td>60,000,000 × 0.05</td></tr>
+            <tr><td>순 GMV</td><td>57,000,000원</td><td>60,000,000 - 3,000,000</td></tr>
+            <tr><td>테이크레이트 수익</td><td>5,700,000원</td><td>57,000,000 × 0.10</td></tr>
+            <tr><td>고정 수수료 수익</td><td>2,000,000원</td><td>2,000 × 1,000</td></tr>
+            <tr><td>광고 수익</td><td>500,000원</td><td>500,000</td></tr>
+            <tr><td>총 매출</td><td>8,200,000원</td><td>5,700,000 + 2,000,000 + 500,000</td></tr>
+            <tr><td>결제 수수료</td><td>246,000원</td><td>8,200,000 × 0.03</td></tr>
+            <tr><td>총 비용</td><td>13,246,000원</td><td>3,000,000 + 8,000,000 + 2,000,000 + 246,000</td></tr>
+            <tr><td>순이익</td><td>-5,046,000원</td><td>8,200,000 - 13,246,000 (손실)</td></tr>
+        </table>
+    </div>
+
+    <div class="test-section expected">
+        <h2>예상 LTV/CAC</h2>
+        <table>
+            <tr><th>항목</th><th>예상값</th><th>계산식</th></tr>
+            <tr><td>고객 생존 기간</td><td>20개월</td><td>1 / 0.05</td></tr>
+            <tr><td>월간 수익</td><td>6,000원</td><td>30,000 × 2 × 0.10</td></tr>
+            <tr><td>LTV</td><td>120,000원</td><td>6,000 × 20</td></tr>
+            <tr><td>CAC</td><td>3,000원</td><td>3,000,000 / 1,000</td></tr>
+            <tr><td>LTV/CAC 비율</td><td>40</td><td>120,000 / 3,000</td></tr>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>실제 테스트 방법</h2>
+        <ol>
+            <li>http://localhost:3000/dashboard 접속</li>
+            <li>온보딩에서 B2C Platform 비즈니스 모델 선택</li>
+            <li>위의 입력 데이터 입력</li>
+            <li>시뮬레이션 실행</li>
+            <li>결과와 예상값 비교</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>검증 포인트</h2>
+        <ul>
+            <li>✅ 1월 GMV가 60,000,000원인가?</li>
+            <li>✅ 1월 총 매출이 8,200,000원인가?</li>
+            <li>✅ 1월 순이익이 -5,046,000원(손실)인가?</li>
+            <li>✅ LTV가 120,000원인가?</li>
+            <li>✅ CAC가 3,000원인가?</li>
+            <li>✅ LTV/CAC 비율이 40인가?</li>
+            <li>✅ 공급자 지표가 올바르게 계산되는가?</li>
+            <li>✅ 환불률이 정확히 반영되는가?</li>
+        </ul>
+    </div>
+</body>
+</html>

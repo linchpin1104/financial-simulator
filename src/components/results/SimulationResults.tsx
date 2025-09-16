@@ -4,15 +4,18 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BusinessType, SaasInputs, ManufacturingInputs, B2CPlatformInputs, CostInputs } from '@/types';
 import { runSimulation, SimulationInputs } from '@/lib/simulation';
-import RevenueChart from './RevenueChart';
-import CostChart from './CostChart';
-import CustomerChart from './CustomerChart';
-import KPICards from './KPICards';
-import BreakEvenAnalysisCard from './BreakEvenAnalysisCard';
-import CostStructureCard from './CostStructureCard';
-import ScaleEconomicsCard from './ScaleEconomicsCard';
-import HRCostAnalysisCard from './HRCostAnalysisCard';
-import IndustryBenchmarkCard from './IndustryBenchmarkCard';
+// import RevenueChart from './RevenueChart';
+// import CostChart from './CostChart';
+// import CustomerChart from './CustomerChart';
+// import KPICards from './KPICards';
+// import BreakEvenAnalysisCard from './BreakEvenAnalysisCard';
+// import CostStructureCard from './CostStructureCard';
+// import ScaleEconomicsCard from './ScaleEconomicsCard';
+// import HRCostAnalysisCard from './HRCostAnalysisCard';
+// import IndustryBenchmarkCard from './IndustryBenchmarkCard';
+import ExecutiveSummary from './ExecutiveSummary';
+import DetailedAnalysis from './DetailedAnalysis';
+import ActionPlan from './ActionPlan';
 
 interface SimulationResultsProps {
   businessType: BusinessType;
@@ -64,64 +67,35 @@ export default function SimulationResults({
   }
 
   return (
-    <div className="space-y-6">
-      {/* KPI 카드 */}
-      <KPICards 
-        result={simulationResult} 
-        businessType={businessType} 
-        currency={currency} 
-      />
-
-      {/* 차트들 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RevenueChart 
-          result={simulationResult} 
-          businessType={businessType} 
-          currency={currency} 
-        />
-        <CostChart 
-          result={simulationResult} 
-          currency={currency} 
-        />
-      </div>
-
-      <CustomerChart 
-        result={simulationResult} 
-        businessType={businessType} 
-      />
-
-      {/* 손익분기점 분석 */}
-      <BreakEvenAnalysisCard 
+    <div className="space-y-8">
+      {/* 1단계: 핵심 대시보드 (Executive Summary) */}
+      <ExecutiveSummary 
         result={simulationResult}
+        businessType={businessType}
         currency={currency}
-      />
-
-      {/* 비용 구조 분석 */}
-      <CostStructureCard 
-        result={simulationResult}
         costInputs={costInputs}
-        currency={currency}
+        saasInputs={saasInputs}
+        manufacturingInputs={manufacturingInputs}
+        b2cPlatformInputs={b2cPlatformInputs}
       />
 
-      {/* 규모의 경제 분석 */}
-      <ScaleEconomicsCard 
+      {/* 2단계: 상세 분석 (Drill-down) */}
+      <DetailedAnalysis 
         result={simulationResult}
         businessType={businessType}
         currency={currency}
+        costInputs={costInputs}
+        saasInputs={saasInputs}
+        manufacturingInputs={manufacturingInputs}
+        b2cPlatformInputs={b2cPlatformInputs}
       />
 
-      {/* 인건비 분석 */}
-      <HRCostAnalysisCard 
+      {/* 3단계: 액션 플랜 (Action Items) */}
+      <ActionPlan 
         result={simulationResult}
         businessType={businessType}
         currency={currency}
-      />
-
-      {/* 산업 벤치마크 비교 */}
-      <IndustryBenchmarkCard 
-        result={simulationResult}
-        businessType={businessType}
-        currency={currency}
+        costInputs={costInputs}
       />
     </div>
   );

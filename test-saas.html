@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .expected { background-color: #e8f5e8; }
+        .actual { background-color: #fff3cd; }
+        .error { background-color: #f8d7da; }
+        .success { background-color: #d4edda; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>SaaS 비즈니스 모델 테스트</h1>
+    
+    <div class="test-section">
+        <h2>입력 데이터</h2>
+        <ul>
+            <li>회사명: TestSaaS Corp</li>
+            <li>시작월: 2024-01</li>
+            <li>통화: KRW</li>
+            <li>비즈니스 타입: SaaS</li>
+            <li>월간 방문자: 10,000명</li>
+            <li>방문자→가입 전환율: 5%</li>
+            <li>가입→유료 전환율: 20%</li>
+            <li>월간 이탈률: 3%</li>
+            <li>월간 가격: 50,000원</li>
+            <li>연간 가격: 500,000원</li>
+            <li>연간 할인율: 10%</li>
+        </ul>
+    </div>
+
+    <div class="test-section expected">
+        <h2>예상 결과 (1월)</h2>
+        <table>
+            <tr><th>항목</th><th>예상값</th><th>계산식</th></tr>
+            <tr><td>신규 가입자</td><td>500명</td><td>10,000 × 0.05</td></tr>
+            <tr><td>신규 유료고객</td><td>100명</td><td>500 × 0.20</td></tr>
+            <tr><td>활성 고객</td><td>100명</td><td>첫 달</td></tr>
+            <tr><td>월간 매출</td><td>5,000,000원</td><td>100 × 50,000</td></tr>
+            <tr><td>연간 매출</td><td>3,750,000원</td><td>100 × 500,000 × 0.9 / 12</td></tr>
+            <tr><td>총 매출</td><td>8,750,000원</td><td>5,000,000 + 3,750,000</td></tr>
+            <tr><td>결제 수수료</td><td>262,500원</td><td>8,750,000 × 0.03</td></tr>
+            <tr><td>총 비용</td><td>8,262,500원</td><td>2,000,000 + 5,000,000 + 1,000,000 + 262,500</td></tr>
+            <tr><td>순이익</td><td>487,500원</td><td>8,750,000 - 8,262,500</td></tr>
+        </table>
+    </div>
+
+    <div class="test-section expected">
+        <h2>예상 LTV/CAC</h2>
+        <table>
+            <tr><th>항목</th><th>예상값</th><th>계산식</th></tr>
+            <tr><td>LTV</td><td>1,666,667원</td><td>50,000 / 0.03</td></tr>
+            <tr><td>CAC</td><td>20,000원</td><td>2,000,000 / 100</td></tr>
+            <tr><td>LTV/CAC 비율</td><td>83.33</td><td>1,666,667 / 20,000</td></tr>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>실제 테스트 방법</h2>
+        <ol>
+            <li>http://localhost:3000/dashboard 접속</li>
+            <li>온보딩에서 SaaS 비즈니스 모델 선택</li>
+            <li>위의 입력 데이터 입력</li>
+            <li>시뮬레이션 실행</li>
+            <li>결과와 예상값 비교</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>검증 포인트</h2>
+        <ul>
+            <li>✅ 1월 매출이 8,750,000원인가?</li>
+            <li>✅ 1월 순이익이 487,500원인가?</li>
+            <li>✅ LTV가 1,666,667원인가?</li>
+            <li>✅ CAC가 20,000원인가?</li>
+            <li>✅ LTV/CAC 비율이 83.33인가?</li>
+            <li>✅ 손익분기점 분석이 올바른가?</li>
+            <li>✅ 비용 구조 분석이 정확한가?</li>
+            <li>✅ 산업 벤치마크 비교가 작동하는가?</li>
+        </ul>
+    </div>
+</body>
+</html>

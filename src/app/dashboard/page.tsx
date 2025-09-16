@@ -6,10 +6,9 @@ import { useAppStore } from '@/store/useAppStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SaasInputForm from '@/components/inputs/SaasInputForm';
-import ManufacturingInputForm from '@/components/inputs/ManufacturingInputForm';
-import B2CPlatformInputForm from '@/components/inputs/B2CPlatformInputForm';
-import CostInputForm from '@/components/inputs/CostInputForm';
+import RevenueInputSection from '@/components/sections/RevenueInputSection';
+import CostInputSection from '@/components/sections/CostInputSection';
+import AdvancedSettingsSection from '@/components/sections/AdvancedSettingsSection';
 import SimulationResults from '@/components/results/SimulationResults';
 import ScenarioComparison from '@/components/scenarios/ScenarioComparison';
 import ExportButtons from '@/components/export/ExportButtons';
@@ -275,78 +274,37 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="inputs" className="space-y-6">
-            {/* 비즈니스 모델 입력 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>비즈니스 모델 입력</CardTitle>
-                <CardDescription>
-                  {currentBusinessType === 'saas' && 'SaaS/플랫폼 모델 입력'}
-                  {currentBusinessType === 'manufacturing' && '제조/유통 모델 입력'}
-                  {currentBusinessType === 'b2c-platform' && 'B2C 플랫폼 모델 입력'}
-                  {currentBusinessType === 'hybrid' && '복합 모델 입력'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {currentBusinessType === 'saas' && (
-                  <SaasInputForm
-                    initialData={saasInputs}
-                    onChange={setSaasInputs}
-                    currency={onboarding.currency}
-                  />
-                )}
-                {currentBusinessType === 'manufacturing' && (
-                  <ManufacturingInputForm
-                    initialData={manufacturingInputs}
-                    onChange={setManufacturingInputs}
-                    currency={onboarding.currency}
-                  />
-                )}
-                {currentBusinessType === 'b2c-platform' && (
-                  <B2CPlatformInputForm
-                    initialData={b2cPlatformInputs}
-                    onChange={setB2CPlatformInputs}
-                    currency={onboarding.currency}
-                  />
-                )}
-                {currentBusinessType === 'hybrid' && (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">플랫폼 요소</h3>
-                      <SaasInputForm
-                        initialData={saasInputs}
-                        onChange={setSaasInputs}
-                        currency={onboarding.currency}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">제조/유통 요소</h3>
-                      <ManufacturingInputForm
-                        initialData={manufacturingInputs}
-                        onChange={setManufacturingInputs}
-                        currency={onboarding.currency}
-                      />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="inputs" className="space-y-8">
+            {/* 매출 설정 섹션 */}
+            <RevenueInputSection
+              businessType={currentBusinessType || 'saas'}
+              saasInputs={saasInputs}
+              manufacturingInputs={manufacturingInputs}
+              b2cPlatformInputs={b2cPlatformInputs}
+              onSaasInputsChange={setSaasInputs}
+              onManufacturingInputsChange={setManufacturingInputs}
+              onB2CPlatformInputsChange={setB2CPlatformInputs}
+              currency={onboarding.currency}
+            />
 
-            {/* 비용 입력 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>비용 구조</CardTitle>
-                <CardDescription>고정비와 변동비 입력</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CostInputForm
-                  initialData={costInputs}
-                  onChange={setCostInputs}
-                  currency={onboarding.currency}
-                  businessType={currentBusinessType || 'saas'}
-                />
-              </CardContent>
-            </Card>
+            {/* 비용 설정 섹션 */}
+            <CostInputSection
+              costInputs={costInputs}
+              onCostInputsChange={setCostInputs}
+              currency={onboarding.currency}
+              businessType={currentBusinessType || 'saas'}
+            />
+
+            {/* 고급 설정 섹션 */}
+            <AdvancedSettingsSection
+              businessType={currentBusinessType || 'saas'}
+              saasInputs={saasInputs}
+              manufacturingInputs={manufacturingInputs}
+              b2cPlatformInputs={b2cPlatformInputs}
+              onSaasInputsChange={setSaasInputs}
+              onManufacturingInputsChange={setManufacturingInputs}
+              onB2CPlatformInputsChange={setB2CPlatformInputs}
+            />
           </TabsContent>
 
           <TabsContent value="results" className="space-y-6">

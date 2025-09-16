@@ -1,4 +1,4 @@
-import { MonthlyResult, SummaryResult, BusinessType } from '@/types';
+import { MonthlyResult, BusinessType } from '@/types';
 
 /**
  * 규모의 경제 분석 결과 타입
@@ -113,7 +113,7 @@ export function analyzeScaleEconomics(
       0.5, // 최소 비용 비율 (50%)
       revenueScales[0].costRatio * Math.pow(0.9, Math.log2(1 + factor)) // 로그 함수로 감소 속도 조절
     );
-    const predictedCosts = revenueGrowth * costRatio;
+    // const predictedCosts = revenueGrowth * costRatio;
     const currentCostRatio = revenueScales[0].costRatio;
     const savings = revenueGrowth * (currentCostRatio - costRatio);
     

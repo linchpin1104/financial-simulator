@@ -1,5 +1,5 @@
 import { SaasInputs, CostInputs, SimulationResult, MonthlyResult, SummaryResult, ChannelInfo } from '@/types';
-import { calculateFunnelConversion, getFunnelConversionRate } from './funnelCalculator';
+import { calculateFunnelConversion } from './funnelCalculator';
 import { applyGrowthRates } from './growthRateCalculator';
 import { applyQuarterlyDetailedSettings } from './quarterlyDetailedCalculator';
 
@@ -118,7 +118,7 @@ export function runSaasSimulation(
     mrr: monthlyResults[getMonthString(startMonth, months - 1)]?.mrr || 0,
     arr: (monthlyResults[getMonthString(startMonth, months - 1)]?.mrr || 0) * 12,
     ltv: calculateLTV(saasInputs),
-    cac: calculateCAC(saasInputs, costInputs),
+    cac: calculateCAC(saasInputs),
   };
   
   return {
@@ -142,7 +142,7 @@ function calculateLTV(saasInputs: SaasInputs): number {
   return monthlyPrice / monthlyChurnRate;
 }
 
-function calculateCAC(saasInputs: SaasInputs, _costInputs: CostInputs): number {
+function calculateCAC(saasInputs: SaasInputs): number {
   const monthlyNewCustomers = Math.round(
     saasInputs.monthlyVisitors * 
     saasInputs.visitorToSignupRate * 

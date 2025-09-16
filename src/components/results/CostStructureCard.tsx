@@ -16,12 +16,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  LineChart,
-  Line,
 } from 'recharts';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DollarSign, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
 
@@ -32,7 +30,18 @@ interface CostStructureCardProps {
 }
 
 export default function CostStructureCard({ result, costInputs, currency }: CostStructureCardProps) {
-  const [fixedMarketingRatio, setFixedMarketingRatio] = useState(0.5); // 기본값: 마케팅 비용의 50%가 고정 비용
+  const [costStructureType, setCostStructureType] = useState('saas'); // 기본값: SaaS 비즈니스 모델
+  
+  // 비즈니스 모델별 사전 정의된 비용 구조
+  const costStructureTemplates = {
+    saas: { name: 'SaaS', ratio: 0.7, description: '고정비 70% (개발, 인프라 중심)' },
+    ecommerce: { name: '이커머스', ratio: 0.5, description: '고정비 50% (마케팅, 재고 중심)' },
+    manufacturing: { name: '제조업', ratio: 0.8, description: '고정비 80% (설비, 인력 중심)' },
+    service: { name: '서비스업', ratio: 0.6, description: '고정비 60% (인력, 운영 중심)' },
+    custom: { name: '맞춤 설정', ratio: 0.5, description: '사용자 정의 비율' }
+  };
+  
+  const fixedMarketingRatio = costStructureTemplates[costStructureType as keyof typeof costStructureTemplates].ratio;
   
   // 비용 구조 분석 수행
   const costStructure = analyzeCostStructure(
@@ -93,20 +102,13 @@ export default function CostStructureCard({ result, costInputs, currency }: Cost
                 <Label>마케팅 비용 중 고정 비용 비율</Label>
                 <span className="text-sm font-medium">{formatPercent(fixedMarketingRatio)}</span>
               </div>
-              <Slider
-                value={[fixedMarketingRatio * 100]}
-                onValueChange={([value]) => setFixedMarketingRatio(value / 100)}
-                max={100}
-                step={1}
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>0% (전액 변동비)</span>
-                <span>50%</span>
-                <span>100% (전액 고정비)</span>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  현재 선택된 비즈니스 모델에 따라 고정비 비율이 자동으로 설정됩니다.
+                </p>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                마케팅 비용 중 고정적으로 지출되는 비율을 설정하세요. 브랜딩, 콘텐츠 제작 등은 고정 비용으로, 
-                광고비, 성과 기반 마케팅 등은 변동 비용으로 간주됩니다.
+                비즈니스 모델에 따라 고정비 비율이 자동으로 설정됩니다. 설정 탭에서 다른 모델을 선택할 수 있습니다.
               </p>
             </div>
           </div>
@@ -155,10 +157,11 @@ export default function CostStructureCard({ result, costInputs, currency }: Cost
           
           {/* 차트 */}
           <Tabs defaultValue="cost-type">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="cost-type">비용 유형</TabsTrigger>
               <TabsTrigger value="fixed-costs">고정 비용 세부</TabsTrigger>
               <TabsTrigger value="variable-costs">변동 비용 세부</TabsTrigger>
+              <TabsTrigger value="settings">설정</TabsTrigger>
             </TabsList>
             
             <TabsContent value="cost-type" className="mt-4">
@@ -300,6 +303,46 @@ export default function CostStructureCard({ result, costInputs, currency }: Cost
                     <p className="text-sm font-medium">기타 변동비</p>
                     <p className="text-sm font-medium">{formatCurrency(costStructure.variableCosts.other, currency)}</p>
                   </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="settings" className="mt-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="cost-structure-type" className="text-sm font-medium">
+                    비즈니스 모델별 비용 구조
+                  </Label>
+                  <div className="mt-2">
+                    <Select value={costStructureType} onValueChange={setCostStructureType}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="비즈니스 모델을 선택하세요" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(costStructureTemplates).map(([key, template]) => (
+                          <SelectItem key={key} value={key}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{template.name}</span>
+                              <span className="text-xs text-gray-500">{template.description}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    현재 선택된 모델: {costStructureTemplates[costStructureType as keyof typeof costStructureTemplates].name} 
+                    (고정비 {Math.round(fixedMarketingRatio * 100)}%)
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">💡 비용 구조 최적화 팁</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• 고정비 비율이 높으면 시장 변화에 취약할 수 있습니다</li>
+                    <li>• 변동비 중심 구조는 유연성을 높이지만 예측이 어려울 수 있습니다</li>
+                    <li>• 비즈니스 모델에 맞는 적절한 비용 구조를 선택하세요</li>
+                  </ul>
                 </div>
               </div>
             </TabsContent>
