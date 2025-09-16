@@ -76,7 +76,6 @@ export default function SimulationResults({
         />
         <CostChart 
           result={simulationResult} 
-          businessType={businessType} 
           currency={currency} 
         />
       </div>
@@ -84,7 +83,6 @@ export default function SimulationResults({
       <CustomerChart 
         result={simulationResult} 
         businessType={businessType} 
-        currency={currency} 
       />
     </div>
   );

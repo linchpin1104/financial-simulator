@@ -185,7 +185,7 @@ export default function CostInputForm({ initialData, onChange, currency, busines
                 />
               </div>
               <p className="text-sm text-gray-600 mt-1">
-                단위당 {formatCurrency(data.shippingCostPerUnit)}의 배송 비용
+                단위당 {formatCurrency(data.shippingCostPerUnit || 0)}의 배송 비용
               </p>
             </div>
           </CardContent>
@@ -252,7 +252,7 @@ export default function CostInputForm({ initialData, onChange, currency, busines
                 {(businessType === 'manufacturing' || businessType === 'hybrid') && (
                   <div className="flex justify-between">
                     <span>배송비 (단위당):</span>
-                    <span>{formatCurrency(data.shippingCostPerUnit)}</span>
+                    <span>{formatCurrency(data.shippingCostPerUnit || 0)}</span>
                   </div>
                 )}
               </div>

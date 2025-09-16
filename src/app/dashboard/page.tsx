@@ -79,7 +79,7 @@ export default function Dashboard() {
     const inputs: SimulationInputs = {
       businessType: currentBusinessType || 'saas',
       costInputs,
-      startMonth: onboardingData.startMonth,
+      startMonth: onboarding.startMonth,
       months: 12,
     };
 
@@ -99,7 +99,7 @@ export default function Dashboard() {
       console.error('Simulation error:', error);
       return null;
     }
-  }, [currentBusinessType, saasInputs, manufacturingInputs, b2cPlatformInputs, costInputs, onboarding.startMonth]);
+  }, [currentBusinessType, saasInputs, manufacturingInputs, b2cPlatformInputs, costInputs, onboarding]);
 
   useEffect(() => {
     if (!isOnboardingComplete) {
@@ -110,9 +110,6 @@ export default function Dashboard() {
   if (!isOnboardingComplete || !onboarding) {
     return null;
   }
-
-  // TypeScript가 onboarding이 null이 아님을 인식하도록 타입 단언
-  const onboardingData = onboarding as NonNullable<typeof onboarding>;
 
   const getBusinessTypeInfo = (type: string) => {
     switch (type) {

@@ -102,9 +102,9 @@ export default function CostDonutChart({ costInputs, businessType, currency, tot
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                formatter={(value, entry: { color: string; payload: { value: number } }) => (
-                  <span style={{ color: entry.color }}>
-                    {value}: {formatCurrency(entry.payload.value)}
+                formatter={(value, entry) => (
+                  <span style={{ color: entry?.color }}>
+                    {value}: {formatCurrency(entry?.payload?.value || 0)}
                   </span>
                 )}
               />
